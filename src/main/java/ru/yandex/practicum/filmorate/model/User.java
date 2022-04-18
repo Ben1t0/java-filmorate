@@ -20,4 +20,8 @@ public class User {
     @NotNull(message = "Birthday should have correct form")
     @Past(message = "User birthday must be in the past")
     private LocalDate birthday;
+
+    public void setLogin(String login) {
+        this.login = login.trim();
+    }
 }

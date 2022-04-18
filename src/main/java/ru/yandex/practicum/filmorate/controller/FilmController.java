@@ -38,7 +38,7 @@ public class FilmController {
     private void validateAndAdd(Film film) {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             log.warn("Film release date must be after 28-12-1985");
-            throw new ValidationException("Film release date must be after 28-12-1985", "Release date");
+            throw new ValidationException("Film release date must be after 28-12-1985", "releaseDate");
         }
 
         films.add(film);
