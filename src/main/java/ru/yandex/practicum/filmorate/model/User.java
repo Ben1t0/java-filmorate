@@ -3,29 +3,21 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
     @EqualsAndHashCode.Include
-    private int id;
-    @Email
+    @NotNull(message = "User id should be present")
+    private Integer id;
+    @Email(message = "Email should be valid")
     private String email;
-    @NotBlank
+    @NotBlank(message = "User login can't be blank")
     private String login;
-    @NotBlank
     private String name;
-    @NotNull
-    private LocalDate birthdate;
-
-    public boolean isValid() {
-        if (login.isBlank() || !email.contains("@") || birthdate.isAfter(LocalDate.now())) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+    @NotNull(message = "Birthday should have correct form")
+    @Past(message = "User birthday must be in the past")
+    private LocalDate birthday;
 }
