@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @Data
 public class Violation {
