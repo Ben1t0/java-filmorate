@@ -9,10 +9,8 @@ import java.time.LocalDate;
 
 @Builder
 @Data
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
-    @EqualsAndHashCode.Include
-    @NotNull(message = "User id should be present")
+    //@NotNull(message = "User id should be present")
     private Integer id;
     @Email(message = "Email should be valid")
     private String email;
