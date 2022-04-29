@@ -43,8 +43,22 @@ public class FilmService {
         return filmDTO;
     }
 
+    public FilmDTO remove(int filmID){
+        if(filmID < 0){
+            log.warn("Film ID below 0");
+            throw new ValidationException("Film id should be positive", "id");
+        }
+        Film f = storage.findFilmById(filmID);
+        storage.remove(f);
+        return f.toDTO();
+    }
+
+    public FilmDTO findFilmById(int filmId){
+        return storage.findFilmById(filmId).toDTO();
+    }
+
     public Collection<String> getWhoLikesFilm(int filmID){
-        return storage.findById(filmID).getWhoLikes();
+        return storage.findFilmById(filmID).getWhoLikes();
     }
 
     private void validate(FilmDTO filmDTO) {

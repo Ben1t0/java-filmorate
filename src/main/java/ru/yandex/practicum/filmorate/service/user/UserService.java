@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.FilmDTO;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.model.user.UserDTO;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -42,6 +44,21 @@ public class UserService {
         storage.update(User.fromDTO(userDTO));
         return userDTO;
     }
+
+    public UserDTO remove(int userId){
+        if(userId < 0){
+            log.warn("Film ID below 0");
+            throw new ValidationException("Film id should be positive", "id");
+        }
+        User user = storage.findUserById(userId);
+        storage.remove(user);
+        return user.toDTO();
+    }
+
+    public UserDTO findUserById(int userId){
+        return storage.findUserById(userId).toDTO();
+    }
+
 
     private void validate(UserDTO userDTO) {
         if (userDTO.getId() != null && userDTO.getId() < 0) {

@@ -12,5 +12,5 @@ public interface FilmStorage {
 
     void remove(Film film);
 
-    Film findById(int filmId);
+    Film findFilmById(int filmId);
 }

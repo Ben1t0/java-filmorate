@@ -20,6 +20,11 @@ public class FilmController {
         return filmService.getAll();
     }
 
+    @GetMapping("/{id}")
+    public FilmDTO getFilmById(@PathVariable("id") int filmId){
+        return filmService.findFilmById(filmId);
+    }
+
     @PutMapping
     public void putFilm(@Valid @RequestBody FilmDTO filmDTO) {
         filmService.update(filmDTO);
@@ -30,5 +35,10 @@ public class FilmController {
     public void postFilm(@Valid @RequestBody FilmDTO filmDTO) {
         filmService.add(filmDTO);
         log.info("Film created: {}", filmDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public FilmDTO removeFilm(@PathVariable(value = "id") int filmId){
+        return filmService.remove(filmId);
     }
 }
