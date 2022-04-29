@@ -2,19 +2,24 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.user.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
-    private Integer global_id = 0;
+    private final Random ran = new Random();
+    private final Set<Integer> usedIDs = new HashSet<>();
 
     private Integer getNextID() {
-        return global_id++;
+        Integer id = ran.nextInt(Integer.MAX_VALUE);
+        while (usedIDs.contains(id)) {
+            id = ran.nextInt(Integer.MAX_VALUE);
+        }
+        usedIDs.add(id);
+        return id;
     }
 
     @Override
@@ -25,10 +30,13 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void create(User user) {
         if (user != null) {
-            if (user.getId() != null && users.containsKey(user.getId())) {
-                throw new AlreadyExistsException(String.format("User with ID = %d already exist!", user.getId()));
+            if (user.getId() == null) {
+                user.setId(getNextID());
+            } else {
+                if (users.containsKey(user.getId())) {
+                    throw new AlreadyExistsException(String.format("User with ID = %d already exist!", user.getId()));
+                }
             }
-            user.setId(getNextID());
             users.put(user.getId(), user);
         }
     }
@@ -44,11 +52,15 @@ public class InMemoryUserStorage implements UserStorage {
     public void remove(User user) {
         if (user != null && user.getId() != null) {
             users.remove(user.getId());
+            usedIDs.remove(user.getId());
         }
     }
 
     @Override
     public User findUserById(int userId) {
+        if (!users.containsKey(userId)) {
+            throw new FilmNotFoundException(String.format("User with ID = %d not found", userId));
+        }
         return users.get(userId);
     }
 }

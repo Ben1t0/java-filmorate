@@ -4,24 +4,40 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Builder
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
-    //@NotNull(message = "User id should be present")
+    @EqualsAndHashCode.Include
     private Integer id;
-    @Email(message = "Email should be valid")
     private String email;
-    @NotBlank(message = "User login can't be blank")
     private String login;
     private String name;
-    @NotNull(message = "Birthday should have correct form")
-    @Past(message = "User birthday must be in the past")
     private LocalDate birthday;
 
     public void setLogin(String login) {
         this.login = login.trim();
+    }
+
+    public UserDTO toDTO(){
+        return UserDTO.builder()
+                .id(id)
+                .login(login)
+                .email(email)
+                .name(name)
+                .birthday(birthday)
+                .build();
+    }
+
+    public static User fromDTO(UserDTO userDTO){
+        return User.builder()
+                .id(userDTO.getId())
+                .login(userDTO.getLogin())
+                .email(userDTO.getEmail())
+                .name(userDTO.getName())
+                .birthday(userDTO.getBirthday())
+                .build();
     }
 }

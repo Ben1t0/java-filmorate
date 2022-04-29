@@ -2,19 +2,24 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistsException;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
-    private Integer global_id = 0;
+    private final Random ran = new Random();
+    private final Set<Integer> usedIDs = new HashSet<>();
 
     private Integer getNextID() {
-        return global_id++;
+        Integer id = ran.nextInt(Integer.MAX_VALUE);
+        while (usedIDs.contains(id)) {
+            id = ran.nextInt(Integer.MAX_VALUE);
+        }
+        usedIDs.add(id);
+        return id;
     }
 
     @Override
@@ -25,10 +30,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void create(Film film) {
         if (film != null) {
-            if (film.getId() != null && films.containsKey(film.getId())) {
-                throw new AlreadyExistsException(String.format("Film with ID = %d already exist!", film.getId()));
+            if (film.getId() == null) {
+                film.setId(getNextID());
+            } else {
+                if (films.containsKey(film.getId())) {
+                    throw new AlreadyExistsException(String.format("Film with ID = %d already exist!", film.getId()));
+                }
             }
-            film.setId(getNextID());
             films.put(film.getId(), film);
         }
     }
@@ -44,11 +52,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void remove(Film film) {
         if (film != null && film.getId() != null) {
             films.remove(film.getId());
+            usedIDs.remove(film.getId());
         }
     }
 
     @Override
     public Film findById(int filmId) {
+        if (!films.containsKey(filmId)) {
+            throw new FilmNotFoundException(String.format("Film with ID = %d not found", filmId));
+        }
         return films.get(filmId);
     }
 }

@@ -4,23 +4,50 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.*;
 
-@Builder
 @Data
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Film {
-    //@NotNull(message = "Film id should be present")
+    private final Map<String, Integer> userLikes = new HashMap<>();
+    @EqualsAndHashCode.Include
     private Integer id;
-
-    @NotBlank(message = "Film name can't be blank")
     private String name;
-    @Size(max = 200, message = "Film description must be shorter than 200 symbols")
     private String description;
-    @NotNull
     private LocalDate releaseDate;
-    @NotNull(message = "Film duration should be present")
-    @Positive(message = "Film duration must be greater than 0")
     private Integer duration;
 
+    public void addLike(String userName) {
+        userLikes.put(userName, 1);
+    }
+
+    public void removeLike(String userName){
+        userLikes.remove(userName);
+    }
+
+    public Collection<String> getWhoLikes(){
+        return userLikes.keySet();
+    }
+
+    public FilmDTO toDTO(){
+        return FilmDTO.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .releaseDate(releaseDate)
+                .duration(duration)
+                .build();
+    }
+
+    public static Film fromDTO(FilmDTO filmDTO){
+        return Film.builder()
+                .id(filmDTO.getId())
+                .name(filmDTO.getName())
+                .description(filmDTO.getDescription())
+                .duration(filmDTO.getDuration())
+                .releaseDate(filmDTO.getReleaseDate())
+                .build();
+    }
 }

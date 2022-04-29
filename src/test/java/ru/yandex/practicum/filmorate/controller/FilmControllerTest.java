@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.FilmDTO;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
@@ -17,12 +19,12 @@ class FilmControllerTest {
 
     @BeforeEach
     public void init() {
-        filmController = new FilmController();
+        filmController = new FilmController(new FilmService(new InMemoryFilmStorage()));
     }
 
     @Test
     public void shouldntThrowExceptionWhenCorrectData() {
-        Film film = Film.builder()
+        FilmDTO filmDTO = FilmDTO.builder()
                 .description("Desc")
                 .id(12)
                 .name("film")
@@ -30,43 +32,45 @@ class FilmControllerTest {
                 .duration(100)
                 .build();
 
-        assertDoesNotThrow(() -> filmController.postFilm(film));
+        assertDoesNotThrow(() -> filmController.postFilm(filmDTO));
         assertEquals(1, filmController.getAll().size());
     }
 
     @Test
     public void shouldThrowExceptionWhenPostExistFilm() {
-        Film film = Film.builder()
+        int id = 0;
+
+        FilmDTO filmDTO = FilmDTO.builder()
                 .description("Desc")
-                .id(12)
+                .id(id)
                 .name("film")
                 .releaseDate(LocalDate.now())
                 .duration(100)
                 .build();
 
-        filmController.postFilm(film);
+        filmController.postFilm(filmDTO);
 
-        AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> filmController.postFilm(film));
+        AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> filmController.postFilm(filmDTO));
 
-        assertEquals("Film with ID = 12 already exists", ex.getMessage());
+        assertEquals(String.format("Film with ID = %d already exist!", id), ex.getMessage());
     }
 
     @Test
-    public void shouldThrowExceptionWhenIncorrectId() {
-        Film film = Film.builder()
+    public void shouldThrowExceptionWhenUpdateWithIncorrectId() {
+        FilmDTO filmDTO = FilmDTO.builder()
                 .description("Desc")
                 .name("film")
                 .releaseDate(LocalDate.now())
                 .duration(100)
                 .build();
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(film));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.putFilm(filmDTO));
         assertEquals("Film id should be present", ex.getMessage());
     }
 
     @Test
     public void shouldThrowExceptionWhenToLongDescription() {
-        Film film = Film.builder()
+        FilmDTO filmDTO = FilmDTO.builder()
                 .id(12)
                 .description("yipoFNgAY9jTMIZMFfKuDUDx5R2niiw1FRAFtNKPegBkZa2tdV7vcKxQffYKirpV4fs0ClLSzhIxSa5AD4mUh" +
                         "XNIJKT3xtmZuMDCtGarMrhdjbd81ZMr2WMibfb8awPKtpb08dHo5NoWrwz9bq2k6lWjN7Jv2ryK5KSPRe5NKIq9lMo" +
@@ -76,13 +80,13 @@ class FilmControllerTest {
                 .duration(100)
                 .build();
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(film));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(filmDTO));
         assertEquals("Film description must be shorter than 200 symbols", ex.getMessage());
     }
 
     @Test
     public void shouldThrowExceptionWhenBlankName() {
-        Film film = Film.builder()
+        FilmDTO filmDTO = FilmDTO.builder()
                 .id(12)
                 .description("Desc")
                 .name("   ")
@@ -90,13 +94,13 @@ class FilmControllerTest {
                 .duration(100)
                 .build();
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(film));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(filmDTO));
         assertEquals("Film name can't be blank", ex.getMessage());
     }
 
     @Test
     public void shouldThrowExceptionWhenReleaseDateBefore1895_12_28() {
-        Film film = Film.builder()
+        FilmDTO filmDTO = FilmDTO.builder()
                 .id(12)
                 .description("Desc")
                 .name("To old film")
@@ -104,13 +108,13 @@ class FilmControllerTest {
                 .duration(100)
                 .build();
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(film));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(filmDTO));
         assertEquals("Film release date must be after 28-12-1895", ex.getMessage());
     }
 
     @Test
     public void shouldThrowExceptionWhenNegativeDuration() {
-        Film film = Film.builder()
+        FilmDTO filmDTO = FilmDTO.builder()
                 .id(12)
                 .description("Desc")
                 .name("negative film")
@@ -118,20 +122,20 @@ class FilmControllerTest {
                 .duration(-100)
                 .build();
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(film));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(filmDTO));
         assertEquals("Film duration must be greater than 0", ex.getMessage());
     }
 
     @Test
     public void shouldThrowExceptionWhenNoDuration() {
-        Film film = Film.builder()
+        FilmDTO filmDTO = FilmDTO.builder()
                 .id(12)
                 .description("Desc")
                 .name("negative film")
                 .releaseDate(LocalDate.now())
                 .build();
 
-        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(film));
+        ValidationException ex = assertThrows(ValidationException.class, () -> filmController.postFilm(filmDTO));
         assertEquals("Film duration should be present", ex.getMessage());
     }
 }
