@@ -6,60 +6,94 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.FilmDTO;
+import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FilmService {
-    private final FilmStorage storage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage storage) {
-        this.storage = storage;
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     public Collection<FilmDTO> getAll() {
-        return storage.getAll().stream().map(Film::toDTO).collect(Collectors.toList());
+        return filmStorage.getAll().stream().map(FilmDTO::fromFilm).collect(Collectors.toList());
     }
 
     public FilmDTO add(FilmDTO filmDTO) {
         validate(filmDTO);
 
-        storage.create(Film.fromDTO(filmDTO));
+        filmStorage.create(filmDTO.asFilm());
         return filmDTO;
     }
 
-    public FilmDTO update(FilmDTO filmDTO){
+    public FilmDTO update(FilmDTO filmDTO) {
         if (filmDTO.getId() == null) {
             log.warn("Film id wasn't present");
             throw new ValidationException("Film id should be present", "id");
         }
         validate(filmDTO);
-        storage.update(Film.fromDTO(filmDTO));
+        filmStorage.update(filmDTO.asFilm());
         return filmDTO;
     }
 
-    public FilmDTO remove(int filmID){
-        if(filmID < 0){
+    public FilmDTO remove(int filmID) {
+        if (filmID < 0) {
             log.warn("Film ID below 0");
             throw new ValidationException("Film id should be positive", "id");
         }
-        Film f = storage.findFilmById(filmID);
-        storage.remove(f);
-        return f.toDTO();
+        Film film = filmStorage.findFilmById(filmID);
+        filmStorage.remove(film);
+        return FilmDTO.fromFilm(film);
     }
 
-    public FilmDTO findFilmById(int filmId){
-        return storage.findFilmById(filmId).toDTO();
+    public FilmDTO findFilmById(int filmId) {
+        return FilmDTO.fromFilm(filmStorage.findFilmById(filmId));
     }
 
-    public Collection<String> getWhoLikesFilm(int filmID){
-        return storage.findFilmById(filmID).getWhoLikes();
+    public Collection<String> getWhoLikesFilm(int filmID) {
+        return filmStorage.findFilmById(filmID).getWhoLikes().stream()
+                .map(u -> userStorage.findUserById(u).getName())
+                .collect(Collectors.toList());
     }
+
+    public Collection<String> addLike(int filmId, int userId) {
+        Film film = filmStorage.findFilmById(filmId);
+        User user = userStorage.findUserById(userId);
+        film.addLike(user.getId());
+        return getWhoLikesFilm(filmId);
+    }
+
+    public Collection<String> removeLike(int filmId, int userId) {
+        Film film = filmStorage.findFilmById(filmId);
+        User user = userStorage.findUserById(userId);
+        film.removeLike(user.getId());
+        return getWhoLikesFilm(filmId);
+    }
+
+    public Collection<FilmDTO> getPopular(int count) {
+        if (count < 0) {
+            log.warn("count below 0");
+            throw new ValidationException("Count should be positive", "count");
+        }
+        return filmStorage.getAll().stream()
+                .sorted(Comparator.comparingInt(f -> f.getWhoLikes().size()))
+                .limit(count)
+                .map(FilmDTO::fromFilm)
+                .collect(Collectors.toList());
+    }
+
 
     private void validate(FilmDTO filmDTO) {
         if (filmDTO.getId() != null && filmDTO.getId() < 0) {
@@ -88,4 +122,6 @@ public class FilmService {
             throw new ValidationException("Film duration must be greater than 0", "duration");
         }
     }
+
+
 }

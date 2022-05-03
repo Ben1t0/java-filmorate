@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Builder
 @Data
@@ -16,28 +18,18 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
+    private final Map<Integer, User> friends = new HashMap<>();
 
     public void setLogin(String login) {
         this.login = login.trim();
     }
 
-    public UserDTO toDTO(){
-        return UserDTO.builder()
-                .id(id)
-                .login(login)
-                .email(email)
-                .name(name)
-                .birthday(birthday)
-                .build();
+    public void addFriend(User friend) {
+        friends.put(friend.id, friend);
     }
 
-    public static User fromDTO(UserDTO userDTO){
-        return User.builder()
-                .id(userDTO.getId())
-                .login(userDTO.getLogin())
-                .email(userDTO.getEmail())
-                .name(userDTO.getName())
-                .birthday(userDTO.getBirthday())
-                .build();
+    public void removeFriend(User friend) {
+        friends.remove(friend.getId());
     }
+
 }

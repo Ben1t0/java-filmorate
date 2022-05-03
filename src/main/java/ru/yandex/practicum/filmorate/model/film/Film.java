@@ -11,7 +11,7 @@ import java.util.*;
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Film {
-    private final Map<String, Integer> userLikes = new HashMap<>();
+    private final Set<Integer> userLikes = new HashSet<>();
     @EqualsAndHashCode.Include
     private Integer id;
     private String name;
@@ -19,35 +19,15 @@ public class Film {
     private LocalDate releaseDate;
     private Integer duration;
 
-    public void addLike(String userName) {
-        userLikes.put(userName, 1);
+    public void addLike(int userId) {
+        userLikes.add(userId);
     }
 
-    public void removeLike(String userName){
-        userLikes.remove(userName);
+    public void removeLike(int userId) {
+        userLikes.remove(userId);
     }
 
-    public Collection<String> getWhoLikes(){
-        return userLikes.keySet();
-    }
-
-    public FilmDTO toDTO(){
-        return FilmDTO.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .releaseDate(releaseDate)
-                .duration(duration)
-                .build();
-    }
-
-    public static Film fromDTO(FilmDTO filmDTO){
-        return Film.builder()
-                .id(filmDTO.getId())
-                .name(filmDTO.getName())
-                .description(filmDTO.getDescription())
-                .duration(filmDTO.getDuration())
-                .releaseDate(filmDTO.getReleaseDate())
-                .build();
+    public Collection<Integer> getWhoLikes() {
+        return userLikes;
     }
 }

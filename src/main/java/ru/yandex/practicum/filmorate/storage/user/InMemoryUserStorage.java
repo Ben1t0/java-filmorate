@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistsException;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.user.User;
 
 import java.util.*;
@@ -10,16 +10,10 @@ import java.util.*;
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
-    private final Random ran = new Random();
-    private final Set<Integer> usedIDs = new HashSet<>();
+    private int globalId = 0;
 
     private Integer getNextID() {
-        Integer id = ran.nextInt(Integer.MAX_VALUE);
-        while (usedIDs.contains(id)) {
-            id = ran.nextInt(Integer.MAX_VALUE);
-        }
-        usedIDs.add(id);
-        return id;
+        return globalId++;
     }
 
     @Override
@@ -52,14 +46,13 @@ public class InMemoryUserStorage implements UserStorage {
     public void remove(User user) {
         if (user != null && user.getId() != null) {
             users.remove(user.getId());
-            usedIDs.remove(user.getId());
         }
     }
 
     @Override
     public User findUserById(int userId) {
         if (!users.containsKey(userId)) {
-            throw new FilmNotFoundException(String.format("User with ID = %d not found", userId));
+            throw new UserNotFoundException(String.format("User with ID = %d not found", userId));
         }
         return users.get(userId);
     }

@@ -15,13 +15,14 @@ import java.util.*;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
+
     @GetMapping
     public Collection<FilmDTO> getAll() {
         return filmService.getAll();
     }
 
     @GetMapping("/{id}")
-    public FilmDTO getFilmById(@PathVariable("id") int filmId){
+    public FilmDTO getFilmById(@PathVariable("id") int filmId) {
         return filmService.findFilmById(filmId);
     }
 
@@ -38,7 +39,26 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public FilmDTO removeFilm(@PathVariable(value = "id") int filmId){
+    public FilmDTO removeFilm(@PathVariable(value = "id") int filmId) {
         return filmService.remove(filmId);
+    }
+
+    //PUT /films/{id}/like/{userId}
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable("id") int filmId,
+                        @PathVariable("otherId") int userId) {
+        filmService.addLike(filmId, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable("id") int filmId,
+                           @PathVariable("otherId") int userId) {
+        filmService.removeLike(filmId, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<FilmDTO> getPopular(
+            @RequestParam(value = "count", defaultValue = "10", required = false) int count) {
+        return filmService.getPopular(count);
     }
 }

@@ -25,4 +25,25 @@ public class UserDTO {
     public void setLogin(String login) {
         this.login = login.trim();
     }
+
+
+    public User asUser() {
+        return User.builder()
+                .id(id)
+                .login(login)
+                .email(email)
+                .name(name)
+                .birthday(birthday)
+                .build();
+    }
+
+    public static UserDTO fromUser(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .login(user.getLogin())
+                .email(user.getEmail())
+                .name(user.getName())
+                .birthday(user.getBirthday())
+                .build();
+    }
 }

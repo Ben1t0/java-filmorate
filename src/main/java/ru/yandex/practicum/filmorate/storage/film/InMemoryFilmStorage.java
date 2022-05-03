@@ -10,16 +10,10 @@ import java.util.*;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
-    private final Random ran = new Random();
-    private final Set<Integer> usedIDs = new HashSet<>();
+    private int globalId = 0;
 
     private Integer getNextID() {
-        Integer id = ran.nextInt(Integer.MAX_VALUE);
-        while (usedIDs.contains(id)) {
-            id = ran.nextInt(Integer.MAX_VALUE);
-        }
-        usedIDs.add(id);
-        return id;
+        return globalId++;
     }
 
     @Override
@@ -52,7 +46,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void remove(Film film) {
         if (film != null && film.getId() != null) {
             films.remove(film.getId());
-            usedIDs.remove(film.getId());
         }
     }
 
