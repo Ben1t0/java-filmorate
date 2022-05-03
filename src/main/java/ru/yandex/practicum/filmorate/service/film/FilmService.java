@@ -31,9 +31,8 @@ public class FilmService {
         return filmStorage.getAll().stream().map(FilmDTO::fromFilm).collect(Collectors.toList());
     }
 
-    public FilmDTO add(FilmDTO filmDTO) {
+    public FilmDTO create(FilmDTO filmDTO) {
         validate(filmDTO);
-
         filmStorage.create(filmDTO.asFilm());
         return filmDTO;
     }

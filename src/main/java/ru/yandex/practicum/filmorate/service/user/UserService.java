@@ -27,7 +27,7 @@ public class UserService {
         return storage.getAll().stream().map(UserDTO::fromUser).collect(Collectors.toList());
     }
 
-    public UserDTO add(UserDTO userDTO) {
+    public UserDTO create(UserDTO userDTO) {
         validate(userDTO);
         storage.create(userDTO.asUser());
         return userDTO;
@@ -59,25 +59,29 @@ public class UserService {
 
     public Collection<UserDTO> addFriend(int userId, int friendId) {
         User user = storage.findUserById(userId);
-        user.addFriend(storage.findUserById(friendId));
-        return user.getFriends().values().stream().map(UserDTO::fromUser).collect(Collectors.toList());
+        User friend = storage.findUserById(friendId);
+        user.addFriend(friend);
+        friend.addFriend(user);
+        return getFriends(userId);
     }
 
     public Collection<UserDTO> removeFriend(int userId, int friendId) {
         User user = storage.findUserById(userId);
-        user.removeFriend(storage.findUserById(friendId));
-        return user.getFriends().values().stream().map(UserDTO::fromUser).collect(Collectors.toList());
+        User friend = storage.findUserById(friendId);
+        user.removeFriend(friend);
+        friend.removeFriend(user);
+        return getFriends(userId);
     }
 
     public Collection<UserDTO> getFriends(int userId) {
-        User user = storage.findUserById(userId);
-        return user.getFriends().values().stream().map(UserDTO::fromUser).collect(Collectors.toList());
+        return storage.findUserById(userId).getFriends().values().stream()
+                .map(UserDTO::fromUser)
+                .collect(Collectors.toList());
     }
 
     public Collection<UserDTO> getCommonFriends(int user1Id, int user2Id) {
         Collection<User> friends1 = storage.findUserById(user1Id).getFriends().values();
         Collection<User> friends2 = storage.findUserById(user2Id).getFriends().values();
-
         return friends1.stream().filter(friends2::contains).map(UserDTO::fromUser).collect(Collectors.toList());
     }
 
@@ -94,7 +98,11 @@ public class UserService {
         if (userDTO.getLogin() == null || userDTO.getLogin().isBlank()) {
             log.warn("User login is blank");
             throw new ValidationException("User login can't be blank", "login");
+        } else if (userDTO.getLogin().trim().contains(" ")) {
+            log.warn("User login contains spaces");
+            throw new ValidationException("User login can't contain spaces", "login");
         }
+
         if (userDTO.getBirthday() == null || userDTO.getBirthday().isAfter(LocalDate.now())) {
             log.warn("User birthday is in the future");
             throw new ValidationException("User birthday must be in the past", "birthday");

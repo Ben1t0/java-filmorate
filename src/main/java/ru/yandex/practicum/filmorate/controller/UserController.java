@@ -50,9 +50,10 @@ public class UserController {
     }
 
     @PostMapping
-    public void postUser(@Valid @RequestBody UserDTO userDTO) {
-        userService.add(userDTO);
+    public UserDTO postUser(@Valid @RequestBody UserDTO userDTO) {
+        UserDTO returnDTO = userService.create(userDTO);
         log.info("User created: {}", userDTO);
+        return returnDTO;
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")

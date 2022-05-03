@@ -22,11 +22,6 @@ public class UserDTO {
     @Past(message = "User birthday must be in the past")
     private LocalDate birthday;
 
-    public void setLogin(String login) {
-        this.login = login.trim();
-    }
-
-
     public User asUser() {
         return User.builder()
                 .id(id)
