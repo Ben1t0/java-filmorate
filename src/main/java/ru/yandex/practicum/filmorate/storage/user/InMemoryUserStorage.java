@@ -10,7 +10,7 @@ import java.util.*;
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
-    private int globalId = 0;
+    private int globalId = 1;
 
     private Integer getNextID() {
         return globalId++;
