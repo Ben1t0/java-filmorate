@@ -25,19 +25,17 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User create(User user) {
         if (user != null) {
-            if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()) ||
-                    u.getLogin().equals(user.getLogin()))) {
-                throw new AlreadyExistsException(String.format("User with email '%s' or login '%s' already exist!",
-                        user.getEmail(), user.getLogin()));
-            }
-            if (user.getId() == null) {
-                user.setId(getNextID());
-            } else {
-                if (users.containsKey(user.getId())) {
-                    throw new AlreadyExistsException(String.format("User with ID = %d already exist!",
-                            user.getId()));
+            for (User u : users.values()) {
+                if (u.getEmail().equals(user.getEmail())) {
+                    throw new AlreadyExistsException(String.format("User ID = %d already use email '%s'",
+                            u.getId(), user.getEmail()));
+                }
+                if (u.getLogin().equals(user.getLogin())) {
+                    throw new AlreadyExistsException(String.format("User ID = %d already use login '%s'",
+                            u.getId(), user.getLogin()));
                 }
             }
+            user.setId(getNextID());
             users.put(user.getId(), user);
             return user;
         }
@@ -47,6 +45,18 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void update(User user) {
         if (user != null && user.getId() != null) {
+            for (User u : users.values()) {
+                if (!u.getId().equals(user.getId())) {
+                    if (u.getEmail().equals(user.getEmail())) {
+                        throw new AlreadyExistsException(String.format("User ID = %d already use email '%s'",
+                                u.getId(), user.getEmail()));
+                    }
+                    if (u.getLogin().equals(user.getLogin())) {
+                        throw new AlreadyExistsException(String.format("User ID = %d already use login '%s'",
+                                u.getId(), user.getLogin()));
+                    }
+                }
+            }
             users.put(user.getId(), user);
         }
     }

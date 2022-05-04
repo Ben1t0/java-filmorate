@@ -36,18 +36,15 @@ class UserControllerTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenPostExistUser() {
-        int id = 0;
+    public void shouldThrowExceptionWhenPostExistUserWithEmail() {
         UserDTO userDTO = UserDTO.builder()
                 .email("test@test.com")
-                .id(id)
                 .login("testUser")
                 .birthday(LocalDate.of(1995, 5, 15))
                 .build();
 
         UserDTO userDTO2 = UserDTO.builder()
-                .email("test2@test.com")
-                .id(id)
+                .email("test@test.com")
                 .login("test2User")
                 .birthday(LocalDate.of(1995, 5, 15))
                 .build();
@@ -56,7 +53,28 @@ class UserControllerTest {
 
         AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> userController.postUser(userDTO2));
 
-        assertEquals(String.format("User with ID = %d already exist!", id), ex.getMessage());
+        assertEquals("User ID = 1 already use email 'test@test.com'", ex.getMessage());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenPostExistUserWithLogin() {
+        UserDTO userDTO = UserDTO.builder()
+                .email("test1@test.com")
+                .login("testUser")
+                .birthday(LocalDate.of(1995, 5, 15))
+                .build();
+
+        UserDTO userDTO2 = UserDTO.builder()
+                .email("test@test.com")
+                .login("testUser")
+                .birthday(LocalDate.of(1995, 5, 15))
+                .build();
+
+        userController.postUser(userDTO);
+
+        AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> userController.postUser(userDTO2));
+
+        assertEquals("User ID = 1 already use login 'testUser'", ex.getMessage());
     }
 
     @Test

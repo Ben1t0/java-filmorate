@@ -25,19 +25,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film create(Film film) {
         if (film != null) {
             if (films.values().stream().anyMatch(f -> f.getName().equals(film.getName()) &&
-                    f.getReleaseDate().isEqual(film.getReleaseDate()) &&
-                    f.getDuration().equals(film.getDuration()))) {
+                    f.getReleaseDate().isEqual(film.getReleaseDate()))) {
                 throw new AlreadyExistsException(
-                        String.format("Film with name '%s', release date '%s' and duration %d already exist!",
-                                film.getName(), film.getReleaseDate().toString(), film.getDuration()));
+                        String.format("Film with name '%s' and release date '%s' already exist!",
+                                film.getName(), film.getReleaseDate().toString()));
             }
-            if (film.getId() == null) {
-                film.setId(getNextID());
-            } else {
-                if (films.containsKey(film.getId())) {
-                    throw new AlreadyExistsException(String.format("Film with ID = %d already exist!", film.getId()));
-                }
-            }
+            film.setId(getNextID());
             films.put(film.getId(), film);
             return film;
         }
@@ -47,6 +40,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void update(Film film) {
         if (film != null && film.getId() != null) {
+            if (films.values().stream()
+                    .filter(f -> !f.getId().equals(film.getId()))
+                    .anyMatch(f -> f.getName().equals(film.getName()) &&
+                            f.getReleaseDate().isEqual(film.getReleaseDate()))) {
+                throw new AlreadyExistsException(
+                        String.format("Film with name '%s' and release date '%s' already exist!",
+                                film.getName(), film.getReleaseDate().toString()));
+            }
             films.put(film.getId(), film);
         }
     }
@@ -64,5 +65,9 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new FilmNotFoundException(String.format("Film with ID = %d not found", filmId));
         }
         return films.get(filmId);
+    }
+
+    private void throwExceptionIfExist(Film film) {
+
     }
 }

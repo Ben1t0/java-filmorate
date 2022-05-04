@@ -39,20 +39,16 @@ class FilmControllerTest {
 
     @Test
     public void shouldThrowExceptionWhenPostExistFilm() {
-        int id = 0;
-
         FilmDTO filmDTO = FilmDTO.builder()
                 .description("Desc")
-                .id(id)
                 .name("film")
                 .releaseDate(LocalDate.now())
                 .duration(100)
                 .build();
 
         FilmDTO filmDTO2 = FilmDTO.builder()
-                .description("Desc")
-                .id(id)
-                .name("film2")
+                .description("Desc2")
+                .name("film")
                 .releaseDate(LocalDate.now())
                 .duration(102)
                 .build();
@@ -61,7 +57,8 @@ class FilmControllerTest {
 
         AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> filmController.postFilm(filmDTO2));
 
-        assertEquals(String.format("Film with ID = %d already exist!", id), ex.getMessage());
+        assertEquals(String.format("Film with name 'film' and release date '%s' already exist!",
+                filmDTO2.getReleaseDate().toString()), ex.getMessage());
     }
 
     @Test

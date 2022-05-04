@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final LocalDate MUST_BEFORE_DATE = LocalDate.of(1895, 12, 28);
 
     @Autowired
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
@@ -107,8 +108,8 @@ public class FilmService {
             throw new ValidationException("Film description must be shorter than 200 symbols", "description");
         }
         if (filmDTO.getReleaseDate() != null
-                && filmDTO.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Film release date before 28-12-1985");
+                && filmDTO.getReleaseDate().isBefore(MUST_BEFORE_DATE)) {
+            log.warn("Film release date before 28-12-1895");
             throw new ValidationException("Film release date must be after 28-12-1895", "releaseDate");
         }
         if (filmDTO.getDuration() == null) {
