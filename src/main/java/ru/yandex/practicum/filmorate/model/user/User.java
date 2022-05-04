@@ -1,29 +1,35 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.user;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Builder
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
     @EqualsAndHashCode.Include
-    @NotNull(message = "User id should be present")
     private Integer id;
-    @Email(message = "Email should be valid")
     private String email;
-    @NotBlank(message = "User login can't be blank")
     private String login;
     private String name;
-    @NotNull(message = "Birthday should have correct form")
-    @Past(message = "User birthday must be in the past")
     private LocalDate birthday;
+    private final Map<Integer, User> friends = new HashMap<>();
 
     public void setLogin(String login) {
         this.login = login.trim();
     }
+
+    public void addFriend(User friend) {
+        friends.put(friend.id, friend);
+    }
+
+    public void removeFriend(User friend) {
+        friends.remove(friend.getId());
+    }
+
 }
