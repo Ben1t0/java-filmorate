@@ -33,8 +33,7 @@ public class FilmService {
 
     public FilmDTO create(FilmDTO filmDTO) {
         validate(filmDTO);
-        filmStorage.create(filmDTO.asFilm());
-        return filmDTO;
+        return FilmDTO.fromFilm(filmStorage.create(filmDTO.asFilm()));
     }
 
     public FilmDTO update(FilmDTO filmDTO) {

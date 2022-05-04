@@ -22,7 +22,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void create(Film film) {
+    public Film create(Film film) {
         if (film != null) {
             if (film.getId() == null) {
                 film.setId(getNextID());
@@ -32,7 +32,9 @@ public class InMemoryFilmStorage implements FilmStorage {
                 }
             }
             films.put(film.getId(), film);
+            return film;
         }
+        return null;
     }
 
     @Override
