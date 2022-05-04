@@ -29,8 +29,7 @@ public class UserService {
 
     public UserDTO create(UserDTO userDTO) {
         validate(userDTO);
-        storage.create(userDTO.asUser());
-        return userDTO;
+        return UserDTO.fromUser(storage.create(userDTO.asUser()));
     }
 
     public UserDTO update(UserDTO userDTO) {

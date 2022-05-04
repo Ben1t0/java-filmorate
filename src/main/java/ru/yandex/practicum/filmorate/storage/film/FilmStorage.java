@@ -7,7 +7,7 @@ import java.util.Collection;
 public interface FilmStorage {
     Collection<Film> getAll();
 
-    void create(Film film);
+    Film create(Film film);
 
     void update(Film film);
 
