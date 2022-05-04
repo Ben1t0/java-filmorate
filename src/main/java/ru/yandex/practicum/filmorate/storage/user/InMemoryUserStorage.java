@@ -22,7 +22,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User create(User user) {
+    public void create(User user) {
         if (user != null) {
             if (user.getId() == null) {
                 user.setId(getNextID());
@@ -32,9 +32,7 @@ public class InMemoryUserStorage implements UserStorage {
                 }
             }
             users.put(user.getId(), user);
-            return user;
         }
-        return null;
     }
 
     @Override
