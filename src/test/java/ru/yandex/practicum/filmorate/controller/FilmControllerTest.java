@@ -49,9 +49,17 @@ class FilmControllerTest {
                 .duration(100)
                 .build();
 
+        FilmDTO filmDTO2 = FilmDTO.builder()
+                .description("Desc")
+                .id(id)
+                .name("film2")
+                .releaseDate(LocalDate.now())
+                .duration(102)
+                .build();
+
         filmController.postFilm(filmDTO);
 
-        AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> filmController.postFilm(filmDTO));
+        AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> filmController.postFilm(filmDTO2));
 
         assertEquals(String.format("Film with ID = %d already exist!", id), ex.getMessage());
     }

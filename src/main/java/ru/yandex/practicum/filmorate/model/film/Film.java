@@ -27,7 +27,7 @@ public class Film {
         userLikes.remove(userId);
     }
 
-    public Collection<Integer> getWhoLikes() {
-        return userLikes;
+    public int getLikesCount(){
+        return userLikes.size();
     }
 }

@@ -44,9 +44,17 @@ class UserControllerTest {
                 .login("testUser")
                 .birthday(LocalDate.of(1995, 5, 15))
                 .build();
+
+        UserDTO userDTO2 = UserDTO.builder()
+                .email("test2@test.com")
+                .id(id)
+                .login("test2User")
+                .birthday(LocalDate.of(1995, 5, 15))
+                .build();
+
         userController.postUser(userDTO);
 
-        AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> userController.postUser(userDTO));
+        AlreadyExistsException ex = assertThrows(AlreadyExistsException.class, () -> userController.postUser(userDTO2));
 
         assertEquals(String.format("User with ID = %d already exist!", id), ex.getMessage());
     }

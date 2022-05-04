@@ -22,8 +22,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void create(Film film) {
+    public Film create(Film film) {
         if (film != null) {
+            if (films.values().stream().anyMatch(f -> f.getName().equals(film.getName()) &&
+                    f.getReleaseDate().isEqual(film.getReleaseDate()) &&
+                    f.getDuration().equals(film.getDuration()))) {
+                throw new AlreadyExistsException(
+                        String.format("Film with name '%s', release date '%s' and duration %d already exist!",
+                                film.getName(), film.getReleaseDate().toString(), film.getDuration()));
+            }
             if (film.getId() == null) {
                 film.setId(getNextID());
             } else {
@@ -32,7 +39,9 @@ public class InMemoryFilmStorage implements FilmStorage {
                 }
             }
             films.put(film.getId(), film);
+            return film;
         }
+        return null;
     }
 
     @Override

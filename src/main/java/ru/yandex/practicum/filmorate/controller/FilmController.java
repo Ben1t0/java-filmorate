@@ -27,9 +27,10 @@ public class FilmController {
     }
 
     @PutMapping
-    public void putFilm(@Valid @RequestBody FilmDTO filmDTO) {
-        filmService.update(filmDTO);
+    public FilmDTO putFilm(@Valid @RequestBody FilmDTO filmDTO) {
+        FilmDTO returnDTO = filmService.update(filmDTO);
         log.info("Film updated: {}", filmDTO);
+        return returnDTO;
     }
 
     @PostMapping
@@ -44,7 +45,6 @@ public class FilmController {
         return filmService.remove(filmId);
     }
 
-    //PUT /films/{id}/like/{userId}
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable("id") int filmId,
                         @PathVariable("userId") int userId) {

@@ -33,8 +33,7 @@ public class FilmService {
 
     public FilmDTO create(FilmDTO filmDTO) {
         validate(filmDTO);
-        filmStorage.create(filmDTO.asFilm());
-        return filmDTO;
+        return FilmDTO.fromFilm(filmStorage.create(filmDTO.asFilm()));
     }
 
     public FilmDTO update(FilmDTO filmDTO) {
@@ -62,7 +61,7 @@ public class FilmService {
     }
 
     public Collection<String> getWhoLikesFilm(int filmID) {
-        return filmStorage.findFilmById(filmID).getWhoLikes().stream()
+        return filmStorage.findFilmById(filmID).getUserLikes().stream()
                 .map(u -> userStorage.findUserById(u).getName())
                 .collect(Collectors.toList());
     }
@@ -87,7 +86,7 @@ public class FilmService {
             throw new ValidationException("Count should be positive", "count");
         }
         return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt(f -> f.getWhoLikes().size()))
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
                 .limit(count)
                 .map(FilmDTO::fromFilm)
                 .collect(Collectors.toList());

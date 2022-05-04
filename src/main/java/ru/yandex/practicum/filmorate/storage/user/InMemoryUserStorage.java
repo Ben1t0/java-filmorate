@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.user.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -22,17 +23,25 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void create(User user) {
+    public User create(User user) {
         if (user != null) {
+            if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()) ||
+                    u.getLogin().equals(user.getLogin()))) {
+                throw new AlreadyExistsException(String.format("User with email '%s' or login '%s' already exist!",
+                        user.getEmail(), user.getLogin()));
+            }
             if (user.getId() == null) {
                 user.setId(getNextID());
             } else {
                 if (users.containsKey(user.getId())) {
-                    throw new AlreadyExistsException(String.format("User with ID = %d already exist!", user.getId()));
+                    throw new AlreadyExistsException(String.format("User with ID = %d already exist!",
+                            user.getId()));
                 }
             }
             users.put(user.getId(), user);
+            return user;
         }
+        return null;
     }
 
     @Override

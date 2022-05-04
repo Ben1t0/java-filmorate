@@ -26,10 +26,18 @@ public class UserController {
         return userService.findUserById(userId);
     }
 
+    @PostMapping
+    public UserDTO postUser(@Valid @RequestBody UserDTO userDTO) {
+        UserDTO returnDTO = userService.create(userDTO);
+        log.info("User created: {}", userDTO);
+        return returnDTO;
+    }
+
     @PutMapping
-    public void putUser(@Valid @RequestBody UserDTO userDTO) {
-        userService.update(userDTO);
+    public UserDTO putUser(@Valid @RequestBody UserDTO userDTO) {
+        UserDTO returnDTO = userService.update(userDTO);
         log.info("User updated: {}", userDTO);
+        return returnDTO;
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -47,13 +55,6 @@ public class UserController {
     @GetMapping("/{id}/friends")
     public Collection<UserDTO> getFriends(@PathVariable("id") int userId) {
         return userService.getFriends(userId);
-    }
-
-    @PostMapping
-    public UserDTO postUser(@Valid @RequestBody UserDTO userDTO) {
-        UserDTO returnDTO = userService.create(userDTO);
-        log.info("User created: {}", userDTO);
-        return returnDTO;
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
