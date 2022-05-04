@@ -32,6 +32,7 @@ public class InMemoryUserStorage implements UserStorage {
                 }
             }
             users.put(user.getId(), user);
+
         }
     }
 
