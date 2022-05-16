@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ###MySQL WorkBench ###
-/.mwb.bak
-/.mwb
+*.mwb.bak
+*.mwb
