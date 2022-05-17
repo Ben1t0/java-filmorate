@@ -120,16 +120,20 @@
     <summary>GET /films</summary>
   
 ```sql
-    SELECT *
-    FROM films;
+    SELECT f.id, f.description,f.name, f.releaseDate, f.durarion, g.name as genre, r.name as mpaaRate 
+    FROM films AS f 
+    LEFT JOIN genres AS g ON f.genre_id = g.genre_id
+    LEFT JOIN mpaaRates AS r ON f.rate_id = r.rate_id;
 ```
 </details>
 <details>
     <summary>GET /films/{id}</summary>
   
 ```sql
-    SELECT *
-    FROM films
+    SELECT f.id, f.description,f.name, f.releaseDate, f.durarion, g.name as genre, r.name as mpaaRate
+    FROM films AS f 
+    LEFT JOIN genres AS g ON f.genre_id = g.genre_id
+    LEFT JOIN mpaaRates AS r ON f.rate_id = r.rate_id
     WHERE id = {id};
 ```
 </details>
@@ -137,9 +141,11 @@
     <summary>GET /films/popular?count=10</summary>
   
 ```sql
-    SELECT f.name, f.releaseDate, COUNT(l.user_id) as rating
+    SELECT f.name, f.releaseDate, COUNT(l.user_id) as userRating, g.name as genre, r.name as mpaaRate
     FROM films AS f
     LEFT JOIN likes AS l ON f.id = l.film_id
+    LEFT JOIN genres AS g ON f.genre_id = g.genre_id
+    LEFT JOIN mpaaRates AS r ON f.rate_id = r.rate_id
     GROUP BY f.id
     ORDER BY COUNT(l.user_id) DESC
     limit {count};
@@ -149,8 +155,8 @@
     <summary>POST /films</summary>
   
 ```sql
-    INSERT INTO films (description,name, releaseDate,duration,genre,rate)
-    VALUES ('desc','Awesome film', TO_DATE('01022019','MMDDYYYY'),120,'comedy','G')
+    INSERT INTO films (description,name, releaseDate,duration,genre_id,rate_id)
+    VALUES ('desc','Awesome film', TO_DATE('01022019','MMDDYYYY'),120,1,2)
     RETURNING id;
 ```
 </details>
@@ -160,7 +166,7 @@
 ```sql
     UPDATE films
     SET description = 'desc',name = 'Awesome film', releaseDate = TO_DATE('01022019','MMDDYYYY'),
-        duration = 120,genre = 'comedy',rate = 'G'
+        duration = 120,genre = 1,rate = 2
     WHERE id = 'id';
 ```
 </details>
