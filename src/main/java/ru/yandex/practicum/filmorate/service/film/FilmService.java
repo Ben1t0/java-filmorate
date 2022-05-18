@@ -95,10 +95,6 @@ public class FilmService {
 
 
     private void validate(FilmDTO filmDTO) {
-        if (filmDTO.getId() != null && filmDTO.getId() < 0) {
-            log.warn("Film ID below 0");
-            throw new ValidationException("Film id should be positive", "id");
-        }
         if (filmDTO.getName() == null || filmDTO.getName().isBlank()) {
             log.warn("Film name is blank");
             throw new ValidationException("Film name can't be blank", "name");

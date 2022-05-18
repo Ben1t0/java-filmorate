@@ -45,6 +45,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void update(User user) {
         if (user != null && user.getId() != null) {
+            if(!users.containsKey(user.getId()))
+            {
+                throw new UserNotFoundException(String.format("Пользователь с ID = %d не найден.",user.getId()));
+            }
             for (User u : users.values()) {
                 if (!u.getId().equals(user.getId())) {
                     if (u.getEmail().equals(user.getEmail())) {

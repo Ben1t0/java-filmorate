@@ -85,10 +85,6 @@ public class UserService {
     }
 
     private void validate(UserDTO userDTO) {
-        if (userDTO.getId() != null && userDTO.getId() < 0) {
-            log.warn("UPDATE METHOD: User ID below 0");
-            throw new ValidationException("User id should be positive", "id");
-        }
         if (userDTO.getEmail() == null ||
                 !Pattern.compile("^(.+)@(\\S+)$").matcher(userDTO.getEmail()).matches()) {
             log.warn("Email is invalid");
