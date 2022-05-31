@@ -22,6 +22,8 @@ public class FilmDTO {
     @NotNull(message = "Film duration should be present")
     @Positive(message = "Film duration must be greater than 0")
     private Integer duration;
+    @NotNull(message = "Need at least MPAA Rate Id")
+    private MpaaRate mpa;
 
     public Film asFilm() {
         return Film.builder()
@@ -30,6 +32,7 @@ public class FilmDTO {
                 .description(description)
                 .releaseDate(releaseDate)
                 .duration(duration)
+                .mpa(mpa)
                 .build();
     }
 
@@ -40,6 +43,7 @@ public class FilmDTO {
                 .description(film.getDescription())
                 .duration(film.getDuration())
                 .releaseDate(film.getReleaseDate())
+                .mpa(film.getMpa())
                 .build();
     }
 }

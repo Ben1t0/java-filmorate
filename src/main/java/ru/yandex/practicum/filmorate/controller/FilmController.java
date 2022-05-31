@@ -36,7 +36,7 @@ public class FilmController {
     @PostMapping
     public FilmDTO postFilm(@Valid @RequestBody FilmDTO filmDTO) {
         FilmDTO returnDTO = filmService.create(filmDTO);
-        log.info("Film created: {}", filmDTO);
+        log.info("Film created: {}", returnDTO);
         return returnDTO;
     }
 

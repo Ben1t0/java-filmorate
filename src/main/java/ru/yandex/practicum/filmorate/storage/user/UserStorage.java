@@ -13,5 +13,14 @@ public interface UserStorage {
 
     void remove(User user);
 
-    User findUserById(int userId);
+    User getUserById(int userId);
+
+    Collection<User> getUsersByIds(Collection<Integer> ids);
+
+    void addUserFriend(int userId, int friendId);
+    void removeUserFriend(int userId, int friendId);
+
+    Collection<User> getUserFriends(int userId);
+
+    void throwIfUserNotFound(int userId);
 }

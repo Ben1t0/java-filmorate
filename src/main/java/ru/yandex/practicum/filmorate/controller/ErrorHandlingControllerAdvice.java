@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,11 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(AlreadyExistsException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String onEntityAlreadyExistsException(AlreadyExistsException e) {
-        return "{\n  \"error\": \"" + e.getMessage() + "\"\n}";
+        if (e.getCause() != null) {
+            return "{\n  \"error\": \"" + e.getMessage() + ", \n\"cause\": \"" + e.getCause().getMessage() + "\" \"\n}";
+        } else {
+            return "{\n  \"error\": \"" + e.getMessage() + "\"\n}";
+        }
     }
 
     @ExceptionHandler(ValidationException.class)
