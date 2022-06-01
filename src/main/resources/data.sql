@@ -15,22 +15,3 @@ MERGE INTO genres (id, name)
            (7, 'Sci-Fi'),
            (8, 'WESTERN'),
            (9, 'ROMANTIC');
-/*
-MERGE INTO users (id, login, name, email, birth_date)
-    values (1, 'asd1', 'asddsa1', 'asd1@asd.com', '1999-07-14'),
-           (2, 'asd2', 'asddsa2', 'asd2@asd.com', '1999-07-15'),
-           (3, 'asd3', 'asddsa3', 'asd3@asd.com', '1999-07-12');
-
-MERGE INTO films (id, name, release_date, description, duration, mpaa_rate_id)
-    values (1, 'iron man 2', '1999-07-14', 'awesome movie', 100, 1),
-           (2, 'iron man', '1999-07-14', 'awesome movie', 100, 2),
-           (3, 'avengers', '1999-07-14', 'awesome movie', 100, 1);
-
-MERGE INTO likes (user_id, film_id)
-    VALUES (1, 1),
-           (1, 2),
-           (1, 3),
-           (2, 1),
-           (2, 2),
-           (3, 1);
-*/

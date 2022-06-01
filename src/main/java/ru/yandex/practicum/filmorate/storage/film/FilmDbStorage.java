@@ -15,12 +15,10 @@ import ru.yandex.practicum.filmorate.model.film.MpaaRate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Optional;
 
 @Repository("filmDbStorage")
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
-
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -30,7 +28,15 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAll() {
-        String sql = "SELECT * FROM films";
+        String sql = "SELECT f.id, " +
+                "f.name, " +
+                "f.release_date, " +
+                "f.description, " +
+                "f.duration, " +
+                "f.mpaa_rate_id,rate.name AS mpaa_rate_name, " +
+                "rate.description AS mpaa_rate_description " +
+                "FROM films AS f " +
+                "JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.id";
         return jdbcTemplate.query(sql, this::mapRowToFilm);
     }
 
@@ -71,7 +77,7 @@ public class FilmDbStorage implements FilmStorage {
             log.warn(e.getMessage());
         }
         if (rowNum != 1) {
-            throw new FilmNotFoundException(String.format("User with id = %d not found.", film.getId()));
+            throw new FilmNotFoundException(String.format("Film with id = %d not found.", film.getId()));
         }
     }
 

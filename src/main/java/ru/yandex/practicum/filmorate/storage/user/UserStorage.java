@@ -7,6 +7,7 @@ import java.util.Collection;
 public interface UserStorage {
 
     Collection<User> getAll();
+
     User create(User user);
 
     void update(User user);
@@ -18,6 +19,7 @@ public interface UserStorage {
     Collection<User> getUsersByIds(Collection<Integer> ids);
 
     void addUserFriend(int userId, int friendId);
+
     void removeUserFriend(int userId, int friendId);
 
     Collection<User> getUserFriends(int userId);

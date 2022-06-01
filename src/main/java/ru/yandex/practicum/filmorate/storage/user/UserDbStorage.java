@@ -121,9 +121,9 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void throwIfUserNotFound(int userId) {
-        try{
+        try {
             jdbcTemplate.queryForObject("SELECT id FROM users WHERE id = ?", Integer.class, userId);
-        } catch (EmptyResultDataAccessException ex){
+        } catch (EmptyResultDataAccessException ex) {
             log.warn(String.format("User with ID = %d not found", userId));
             throw new UserNotFoundException(String.format("User with ID = %d not found", userId));
         }

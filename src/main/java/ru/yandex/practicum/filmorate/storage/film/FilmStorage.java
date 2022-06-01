@@ -17,7 +17,7 @@ public interface FilmStorage {
 
     Collection<Integer> getWhoLikedFilm(int filmId);
 
-    void likeFilm(int filmId,int userId);
+    void likeFilm(int filmId, int userId);
 
     void dislikeFilm(int filmId, int userId);
 

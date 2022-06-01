@@ -41,8 +41,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void update(Film film) {
         if (film != null && film.getId() != null) {
-            if(!films.containsKey(film.getId())){
-                throw new FilmNotFoundException(String.format("Фильм с таким ID = %d не найден",film.getId()));
+            if (!films.containsKey(film.getId())) {
+                throw new FilmNotFoundException(String.format("Фильм с таким ID = %d не найден", film.getId()));
             }
             if (films.values().stream()
                     .filter(f -> !f.getId().equals(film.getId()))
