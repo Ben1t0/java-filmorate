@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.List;
 
 @Builder
 @Data
@@ -25,6 +26,8 @@ public class FilmDTO {
     @NotNull(message = "Need at least MPAA Rate Id")
     private MpaaRate mpa;
 
+    private List<Genre> genres;
+
     public Film asFilm() {
         return Film.builder()
                 .id(id)
@@ -33,6 +36,7 @@ public class FilmDTO {
                 .releaseDate(releaseDate)
                 .duration(duration)
                 .mpa(mpa)
+                .genres(genres)
                 .build();
     }
 
@@ -44,6 +48,7 @@ public class FilmDTO {
                 .duration(film.getDuration())
                 .releaseDate(film.getReleaseDate())
                 .mpa(film.getMpa())
+                .genres(film.getGenres())
                 .build();
     }
 }

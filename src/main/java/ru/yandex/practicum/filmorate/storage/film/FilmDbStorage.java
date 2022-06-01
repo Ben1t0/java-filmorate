@@ -10,11 +10,15 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.AlreadyExistsException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.MpaaRate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository("filmDbStorage")
 @Slf4j
@@ -37,7 +41,9 @@ public class FilmDbStorage implements FilmStorage {
                 "rate.description AS mpaa_rate_description " +
                 "FROM films AS f " +
                 "JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.id";
-        return jdbcTemplate.query(sql, this::mapRowToFilm);
+        return jdbcTemplate.query(sql, this::mapRowToFilm).stream()
+                .map(this::getFilmGenres)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -48,6 +54,8 @@ public class FilmDbStorage implements FilmStorage {
         try {
             int id = simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
             film.setId(id);
+            updateFilmGenres(film);
+            getFilmGenres(film);
         } catch (DuplicateKeyException duplicateKeyException) {
             String errorMessage = duplicateKeyException.getCause().getMessage();
             errorMessage = errorMessage.substring(errorMessage.indexOf("Unique index"), errorMessage.indexOf("\";"));
@@ -56,7 +64,6 @@ public class FilmDbStorage implements FilmStorage {
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
-
         return film;
     }
 
@@ -68,6 +75,7 @@ public class FilmDbStorage implements FilmStorage {
         try {
             rowNum = jdbcTemplate.update(updateQuery, film.getName(), film.getReleaseDate().toString(),
                     film.getDescription(), film.getDuration(), film.getMpa().getId(), film.getId());
+            updateFilmGenres(film);
         } catch (DuplicateKeyException duplicateKeyException) {
             String errorMessage = duplicateKeyException.getCause().getMessage();
             errorMessage = errorMessage.substring(errorMessage.indexOf("Unique index"), errorMessage.indexOf("\";"));
@@ -106,7 +114,7 @@ public class FilmDbStorage implements FilmStorage {
         try {
             Film film = jdbcTemplate.queryForObject(sql, this::mapRowToFilm, filmId);
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
-            return film;
+            return getFilmGenres(film);
         } catch (EmptyResultDataAccessException ex) {
             log.warn(String.format("Film with ID = %d not found", filmId));
             throw new FilmNotFoundException(String.format("Film with ID = %d not found", filmId));
@@ -146,7 +154,40 @@ public class FilmDbStorage implements FilmStorage {
                 " GROUP BY f.id" +
                 " ORDER BY COUNT(l.user_id) DESC" +
                 " LIMIT ?";
-        return jdbcTemplate.query(getPopularQuery, this::mapRowToFilm, count);
+        return jdbcTemplate.query(getPopularQuery, this::mapRowToFilm, count).stream()
+                .map(this::getFilmGenres)
+                .collect(Collectors.toList());
+    }
+
+    private void updateFilmGenres(Film film){
+        if(film.getGenres() != null && film.getGenres().size() > 0) {
+            throwIfFilmNotFound(film.getId());
+            String deleteQuery = "DELETE FROM film_genre where FILM_ID = ?";
+            jdbcTemplate.update(deleteQuery, film.getId());
+
+
+            List<Object[]> batchArgsList = new ArrayList<>();
+
+            for (Genre genre : film.getGenres())
+            {
+                Object[] objectArray = {film.getId(), genre.getId()};
+                batchArgsList.add(objectArray);
+            }
+            String genreAddQuery = "INSERT INTO film_genre (film_id, genre_id) VALUES ( ?,? ) ";
+            jdbcTemplate.batchUpdate(genreAddQuery, batchArgsList);
+        }
+    }
+
+    private Film getFilmGenres(Film film) {
+        try{
+            String getFilmGenresQuery = "SELECT g.id, g.name " +
+                    "FROM film_genre AS fg " +
+                    "JOIN genres AS g ON g.ID = fg.GENRE_ID " +
+                    "WHERE fg.film_id = ?";
+            film.setGenres(jdbcTemplate.query(getFilmGenresQuery, this::mapRowToGenre, film.getId()));
+        } catch (Exception ignore){
+        }
+        return film;
     }
 
     private Film mapRowToFilm(ResultSet rowSet, int rowNum) throws SQLException {
@@ -161,6 +202,13 @@ public class FilmDbStorage implements FilmStorage {
                         .name(rowSet.getString("mpaa_rate_name"))
                         .description(rowSet.getString("mpaa_rate_description"))
                         .build())
+                .build();
+    }
+
+    private Genre mapRowToGenre(ResultSet rowSet, int rowNum) throws SQLException{
+        return Genre.builder()
+                .id(rowSet.getInt("id"))
+                .name(rowSet.getString("name"))
                 .build();
     }
 }

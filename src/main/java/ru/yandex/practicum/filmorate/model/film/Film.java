@@ -20,7 +20,7 @@ public class Film {
     private Integer duration;
     private MpaaRate mpa;
 
-    private List<String> genres;
+    private List<Genre> genres;
 
     public void addLike(int userId) {
         userLikes.add(userId);
