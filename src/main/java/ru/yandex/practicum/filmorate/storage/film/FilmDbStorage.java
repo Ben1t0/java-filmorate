@@ -159,17 +159,15 @@ public class FilmDbStorage implements FilmStorage {
                 .collect(Collectors.toList());
     }
 
-    private void updateFilmGenres(Film film){
-        if(film.getGenres() != null && film.getGenres().size() > 0) {
+    private void updateFilmGenres(Film film) {
+        if (film.getGenres() != null && film.getGenres().size() > 0) {
             throwIfFilmNotFound(film.getId());
             String deleteQuery = "DELETE FROM film_genre where FILM_ID = ?";
             jdbcTemplate.update(deleteQuery, film.getId());
 
-
             List<Object[]> batchArgsList = new ArrayList<>();
 
-            for (Genre genre : film.getGenres())
-            {
+            for (Genre genre : film.getGenres()) {
                 Object[] objectArray = {film.getId(), genre.getId()};
                 batchArgsList.add(objectArray);
             }
@@ -179,13 +177,13 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film getFilmGenres(Film film) {
-        try{
+        try {
             String getFilmGenresQuery = "SELECT g.id, g.name " +
                     "FROM film_genre AS fg " +
                     "JOIN genres AS g ON g.ID = fg.GENRE_ID " +
                     "WHERE fg.film_id = ?";
             film.setGenres(jdbcTemplate.query(getFilmGenresQuery, this::mapRowToGenre, film.getId()));
-        } catch (Exception ignore){
+        } catch (Exception ignore) {
         }
         return film;
     }
@@ -205,7 +203,7 @@ public class FilmDbStorage implements FilmStorage {
                 .build();
     }
 
-    private Genre mapRowToGenre(ResultSet rowSet, int rowNum) throws SQLException{
+    private Genre mapRowToGenre(ResultSet rowSet, int rowNum) throws SQLException {
         return Genre.builder()
                 .id(rowSet.getInt("id"))
                 .name(rowSet.getString("name"))

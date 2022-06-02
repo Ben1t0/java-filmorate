@@ -15,11 +15,3 @@ MERGE INTO genres (id, name)
            (7, 'Sci-Fi'),
            (8, 'WESTERN'),
            (9, 'ROMANTIC');
-
-/*
-INSERT INTO films ( name, release_date, description, duration, mpaa_rate_id)
-    values ('Test film1', '2000-12-10', 'film 1 for test', 100, 1),
-           ('Test film2', '2000-12-10', 'film 2 for test', 100, 2),
-           ('Test film3', '2000-12-10', 'film 3 for test', 100, 3),
-           ('Test film4', '2000-12-10', 'film 4 for test', 100, 3),
-           ('Test film5', '2000-12-10', 'film 5 for test', 100, 3);*/
