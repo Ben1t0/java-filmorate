@@ -32,15 +32,16 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAll() {
-        String sql = "SELECT f.id, " +
-                "f.name, " +
-                "f.release_date, " +
-                "f.description, " +
-                "f.duration, " +
-                "f.mpaa_rate_id,rate.name AS mpaa_rate_name, " +
-                "rate.description AS mpaa_rate_description " +
-                "FROM films AS f " +
-                "JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.id";
+        String sql = """
+                SELECT f.id,
+                f.name,
+                f.release_date,
+                f.description,
+                f.duration,
+                f.mpaa_rate_id,rate.name AS mpaa_rate_name,
+                rate.description AS mpaa_rate_description
+                FROM films AS f
+                JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.id""";
         return jdbcTemplate.query(sql, this::mapRowToFilm).stream()
                 .map(this::getFilmGenres)
                 .collect(Collectors.toList());
@@ -69,8 +70,14 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void update(Film film) {
-        String updateQuery = "UPDATE films SET name = ?, release_date = ?, description = ?, " +
-                "duration = ?, mpaa_rate_id = ? WHERE id = ?";
+        String updateQuery = """
+                UPDATE films
+                SET name = ?,
+                release_date = ?,
+                description = ?,
+                duration = ?,
+                mpaa_rate_id = ?
+                WHERE id = ?""";
         int rowNum = 0;
         try {
             rowNum = jdbcTemplate.update(updateQuery, film.getName(), film.getReleaseDate().toString(),
@@ -106,11 +113,18 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int filmId) {
-        String sql = "SELECT f.id, f.name, f.release_date, f.description, f.duration, f.mpaa_rate_id, " +
-                "rate.name AS mpaa_rate_name, rate.description AS mpaa_rate_description" +
-                " FROM films AS f" +
-                " JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.ID" +
-                " WHERE f.id = ?";
+        String sql = """
+                SELECT f.id,
+                f.name,
+                f.release_date,
+                f.description,
+                f.duration,
+                f.mpaa_rate_id,
+                rate.name AS mpaa_rate_name,
+                rate.description AS mpaa_rate_description
+                FROM films AS f
+                JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.ID
+                WHERE f.id = ?""";
         try {
             Film film = jdbcTemplate.queryForObject(sql, this::mapRowToFilm, filmId);
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
@@ -146,27 +160,32 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getPopular(int count) {
-        String getPopularQuery = "SELECT f.id, f.name, f.release_date, f.description, f.duration, f.mpaa_rate_id, " +
-                "rate.name AS mpaa_rate_name, rate.description AS mpaa_rate_description" +
-                " FROM films AS f" +
-                " JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.id" +
-                " LEFT JOIN likes AS l ON f.id = l.film_id" +
-                " GROUP BY f.id" +
-                " ORDER BY COUNT(l.user_id) DESC" +
-                " LIMIT ?";
+        String getPopularQuery = """
+                SELECT f.id,
+                f.name,
+                f.release_date,
+                f.description,
+                f.duration,
+                f.mpaa_rate_id,
+                rate.name AS mpaa_rate_name,
+                rate.description AS mpaa_rate_description
+                FROM films AS f
+                JOIN mpaa_rates AS rate on f.mpaa_rate_id = rate.id
+                LEFT JOIN likes AS l ON f.id = l.film_id
+                GROUP BY f.id
+                ORDER BY COUNT(l.user_id) DESC
+                LIMIT ?""";
         return jdbcTemplate.query(getPopularQuery, this::mapRowToFilm, count).stream()
                 .map(this::getFilmGenres)
                 .collect(Collectors.toList());
     }
 
     private void updateFilmGenres(Film film) {
+        throwIfFilmNotFound(film.getId());
+        String deleteQuery = "DELETE FROM film_genre where FILM_ID = ?";
+        jdbcTemplate.update(deleteQuery, film.getId());
         if (film.getGenres() != null && film.getGenres().size() > 0) {
-            throwIfFilmNotFound(film.getId());
-            String deleteQuery = "DELETE FROM film_genre where FILM_ID = ?";
-            jdbcTemplate.update(deleteQuery, film.getId());
-
             List<Object[]> batchArgsList = new ArrayList<>();
-
             for (Genre genre : film.getGenres()) {
                 Object[] objectArray = {film.getId(), genre.getId()};
                 batchArgsList.add(objectArray);
@@ -178,10 +197,12 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film getFilmGenres(Film film) {
         try {
-            String getFilmGenresQuery = "SELECT g.id, g.name " +
-                    "FROM film_genre AS fg " +
-                    "JOIN genres AS g ON g.ID = fg.GENRE_ID " +
-                    "WHERE fg.film_id = ?";
+            String getFilmGenresQuery = """
+                    SELECT g.id,
+                    g.name
+                    FROM film_genre AS fg
+                    JOIN genres AS g ON g.ID = fg.GENRE_ID
+                    WHERE fg.film_id = ?""";
             film.setGenres(jdbcTemplate.query(getFilmGenresQuery, this::mapRowToGenre, film.getId()));
         } catch (Exception ignore) {
         }

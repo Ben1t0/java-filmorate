@@ -51,7 +51,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void update(User user) {
-        String updateQuery = "UPDATE users SET login = ?, name = ?, email = ?, birth_date = ? WHERE id = ?";
+        String updateQuery = """
+                UPDATE users
+                SET login = ?,
+                name = ?,
+                email = ?,
+                birth_date = ?
+                WHERE id = ?""";
         int rowNum = 0;
         try {
             rowNum = jdbcTemplate.update(updateQuery, user.getLogin(), user.getName(), user.getEmail(),
@@ -101,7 +107,10 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Collection<User> getUserFriends(int userId) {
         throwIfUserNotFound(userId);
-        String friendsQuery = "SELECT * FROM users where id IN (SELECT friend_id FROM friends WHERE user_id = ?)";
+        String friendsQuery = """
+                SELECT *
+                FROM users
+                WHERE id IN (SELECT friend_id FROM friends WHERE user_id = ?)""";
         return jdbcTemplate.query(friendsQuery, this::mapRowToUser, userId);
     }
 
