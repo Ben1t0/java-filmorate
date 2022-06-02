@@ -6,8 +6,9 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Component
+@Component("filmInMemoryStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private int globalId = 1;
@@ -40,8 +41,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void update(Film film) {
         if (film != null && film.getId() != null) {
-            if(!films.containsKey(film.getId())){
-                throw new FilmNotFoundException(String.format("Фильм с таким ID = %d не найден",film.getId()));
+            if (!films.containsKey(film.getId())) {
+                throw new FilmNotFoundException(String.format("Фильм с таким ID = %d не найден", film.getId()));
             }
             if (films.values().stream()
                     .filter(f -> !f.getId().equals(film.getId()))
@@ -63,14 +64,38 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film findFilmById(int filmId) {
-        if (!films.containsKey(filmId)) {
-            throw new FilmNotFoundException(String.format("Film with ID = %d not found", filmId));
-        }
+    public Collection<Integer> getWhoLikedFilm(int filmId) {
+        return getFilmById(filmId).getUserLikes();
+    }
+
+    @Override
+    public Film getFilmById(int filmId) {
+        throwIfFilmNotFound(filmId);
         return films.get(filmId);
     }
 
-    private void throwExceptionIfExist(Film film) {
+    @Override
+    public void throwIfFilmNotFound(int filmId) {
+        if (!films.containsKey(filmId)) {
+            throw new FilmNotFoundException(String.format("Film with ID = %d not found", filmId));
+        }
+    }
 
+    @Override
+    public void likeFilm(int filmId, int userId) {
+        getFilmById(filmId).addLike(userId);
+    }
+
+    @Override
+    public void dislikeFilm(int filmId, int userId) {
+        getFilmById(filmId).removeLike(userId);
+    }
+
+    @Override
+    public Collection<Film> getPopular(int count) {
+        return films.values().stream()
+                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 }

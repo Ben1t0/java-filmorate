@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.user.User;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("userInMemoryStorage")
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
     private int globalId = 1;
@@ -45,9 +45,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void update(User user) {
         if (user != null && user.getId() != null) {
-            if(!users.containsKey(user.getId()))
-            {
-                throw new UserNotFoundException(String.format("Пользователь с ID = %d не найден.",user.getId()));
+            if (!users.containsKey(user.getId())) {
+                throw new UserNotFoundException(String.format("Пользователь с ID = %d не найден.", user.getId()));
             }
             for (User u : users.values()) {
                 if (!u.getId().equals(user.getId())) {
@@ -66,6 +65,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public Collection<User> getUsersByIds(Collection<Integer> ids) {
+        return ids.stream().map(users::get).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    @Override
     public void remove(User user) {
         if (user != null && user.getId() != null) {
             users.remove(user.getId());
@@ -73,10 +77,32 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findUserById(int userId) {
+    public User getUserById(int userId) {
+        throwIfUserNotFound(userId);
+        return users.get(userId);
+    }
+
+    @Override
+    public void addUserFriend(int userId, int friendId) {
+        User user = getUserById(userId);
+        user.addFriend(getUserById(friendId));
+    }
+
+    @Override
+    public void removeUserFriend(int userId, int friendId) {
+        User user = getUserById(userId);
+        user.removeFriend(getUserById(friendId));
+    }
+
+    @Override
+    public Collection<User> getUserFriends(int userId) {
+        return getUserById(userId).getFriends().values();
+    }
+
+    @Override
+    public void throwIfUserNotFound(int userId) {
         if (!users.containsKey(userId)) {
             throw new UserNotFoundException(String.format("User with ID = %d not found", userId));
         }
-        return users.get(userId);
     }
 }

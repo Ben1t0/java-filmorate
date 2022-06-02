@@ -29,14 +29,14 @@ public class UserController {
     @PostMapping
     public UserDTO postUser(@Valid @RequestBody UserDTO userDTO) {
         UserDTO returnDTO = userService.create(userDTO);
-        log.info("User created: {}", userDTO);
+        log.info("User created: {}", returnDTO);
         return returnDTO;
     }
 
     @PutMapping
     public UserDTO putUser(@Valid @RequestBody UserDTO userDTO) {
         UserDTO returnDTO = userService.update(userDTO);
-        log.info("User updated: {}", userDTO);
+        log.info("User updated: {}", returnDTO);
         return returnDTO;
     }
 

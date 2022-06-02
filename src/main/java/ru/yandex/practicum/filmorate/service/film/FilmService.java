@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
@@ -12,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,7 +23,7 @@ public class FilmService {
     private final LocalDate MUST_BEFORE_DATE = LocalDate.of(1895, 12, 28);
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -52,32 +52,29 @@ public class FilmService {
             log.warn("Film ID below 0");
             throw new ValidationException("Film id should be positive", "id");
         }
-        Film film = filmStorage.findFilmById(filmID);
+        Film film = filmStorage.getFilmById(filmID);
         filmStorage.remove(film);
         return FilmDTO.fromFilm(film);
     }
 
     public FilmDTO findFilmById(int filmId) {
-        return FilmDTO.fromFilm(filmStorage.findFilmById(filmId));
+        return FilmDTO.fromFilm(filmStorage.getFilmById(filmId));
     }
 
     public Collection<String> getWhoLikesFilm(int filmID) {
-        return filmStorage.findFilmById(filmID).getUserLikes().stream()
-                .map(u -> userStorage.findUserById(u).getName())
-                .collect(Collectors.toList());
+        return userStorage.getUsersByIds(filmStorage.getWhoLikedFilm(filmID)).stream()
+                .map(User::getName).collect(Collectors.toList());
     }
 
     public Collection<String> addLike(int filmId, int userId) {
-        Film film = filmStorage.findFilmById(filmId);
-        User user = userStorage.findUserById(userId);
-        film.addLike(user.getId());
+        userStorage.throwIfUserNotFound(userId);
+        filmStorage.likeFilm(filmId, userId);
         return getWhoLikesFilm(filmId);
     }
 
     public Collection<String> removeLike(int filmId, int userId) {
-        Film film = filmStorage.findFilmById(filmId);
-        User user = userStorage.findUserById(userId);
-        film.removeLike(user.getId());
+        userStorage.throwIfUserNotFound(userId);
+        filmStorage.dislikeFilm(filmId, userId);
         return getWhoLikesFilm(filmId);
     }
 
@@ -86,13 +83,10 @@ public class FilmService {
             log.warn("count below 0");
             throw new ValidationException("Count should be positive", "count");
         }
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt(Film::getLikesCount).reversed())
-                .limit(count)
+        return filmStorage.getPopular(count).stream()
                 .map(FilmDTO::fromFilm)
                 .collect(Collectors.toList());
     }
-
 
     private void validate(FilmDTO filmDTO) {
         if (filmDTO.getName() == null || filmDTO.getName().isBlank()) {

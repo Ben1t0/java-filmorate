@@ -13,5 +13,15 @@ public interface FilmStorage {
 
     void remove(Film film);
 
-    Film findFilmById(int filmId);
+    Film getFilmById(int filmId);
+
+    Collection<Integer> getWhoLikedFilm(int filmId);
+
+    void likeFilm(int filmId, int userId);
+
+    void dislikeFilm(int filmId, int userId);
+
+    void throwIfFilmNotFound(int filmId);
+
+    Collection<Film> getPopular(int count);
 }
